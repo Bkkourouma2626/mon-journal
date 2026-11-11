@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Mon Journal">
+<meta name="theme-color" content="#f6f4ef">
+<title>Mon Journal</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#f6f4ef; --card:#ffffff; --ink:#1d1c1a; --ink2:#5c5a55; --muted:#8d8a83;
+  --line:#e6e2d9; --soft:#efebe3;
+  --accent:#1f6f57; --accent-soft:#dcefe7; --accent-ink:#ffffff;
+  --good:#1f7a3a; --mid:#b37400; --bad:#b4372f;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a;
+  --radius:18px;
+  --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#141413; --card:#1f1f1d; --ink:#f0efec; --ink2:#c3c2b7; --muted:#8f8d86;
+    --line:#2f2e2b; --soft:#292826;
+    --accent:#4fbf98; --accent-soft:#1d3a30; --accent-ink:#0f1f19;
+    --good:#5cc27a; --mid:#e0a43a; --bad:#ec6a5f;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 -apple-system,system-ui,sans-serif}
+body{padding-top:var(--safe-t);padding-bottom:calc(84px + var(--safe-b));min-height:100vh}
+h1,h2,h3{font-family:ui-serif,'New York',Georgia,serif;font-weight:650;margin:0;letter-spacing:-.01em}
+h1{font-size:30px}
+h2{font-size:20px;margin-bottom:10px}
+h3{font-size:16px;font-family:-apple-system,system-ui,sans-serif;font-weight:600}
+button{font:inherit;color:inherit;cursor:pointer}
+input,textarea,select{font:inherit;color:var(--ink);background:var(--soft);border:1px solid transparent;border-radius:12px;padding:12px 14px;width:100%;outline:none;-webkit-appearance:none}
+input:focus,textarea:focus,select:focus{border-color:var(--accent);background:var(--card)}
+textarea{resize:none;min-height:84px;line-height:1.45;font-size:16px}
+.wrap{max-width:640px;margin:0 auto;padding:16px 16px 24px}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:8px 0 18px}
+.sub{color:var(--ink2);font-size:14px}
+.card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:14px;border:1px solid var(--line)}
+.label{font-size:13px;font-weight:600;color:var(--ink2);text-transform:uppercase;letter-spacing:.04em;margin:0 0 8px}
+.q{font-weight:600;margin:14px 0 6px;display:flex;align-items:center;gap:8px}
+.q:first-child{margin-top:0}
+.dot{width:8px;height:8px;border-radius:50%;flex:none}
+.row{display:flex;gap:8px;align-items:center}
+.between{justify-content:space-between}
+.wrapf{flex-wrap:wrap}
+.btn{border:0;border-radius:999px;padding:11px 18px;background:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.ghost{background:var(--soft);color:var(--ink)}
+.btn.small{padding:7px 13px;font-size:14px}
+.btn:disabled{opacity:.5}
+.iconbtn{border:0;background:var(--soft);width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:18px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 13px;font-size:14px}
+.chip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.seg{display:flex;background:var(--soft);border-radius:999px;padding:3px}
+.seg button{flex:1;border:0;background:transparent;border-radius:999px;padding:8px 6px;font-size:14px;font-weight:500;color:var(--ink2)}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.rate{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0}
+.rate .nm{font-weight:500;min-width:96px}
+.rate .pts{display:flex;gap:6px}
+.rate .pts button{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--card);font-weight:600;color:var(--ink2)}
+.rate .pts button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tabs{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;padding:6px 6px calc(6px + var(--safe-b));z-index:10}
+.tabs button{flex:1;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-size:11px;font-weight:500;color:var(--muted)}
+.tabs button svg{width:24px;height:24px}
+.tabs button.on{color:var(--accent)}
+.streak{display:inline-flex;align-items:center;gap:6px;background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:14px;padding:6px 12px;border-radius:999px}
+.datebar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}
+.datebar .d{font-weight:600;text-align:center;flex:1}
+.save{font-size:12px;color:var(--muted);text-align:right;min-height:16px}
+.report{white-space:normal;font-size:15px}
+.report p{margin:0 0 8px}
+.report ul{margin:4px 0 10px;padding-left:20px}
+.report strong{font-weight:600}
+.report .h{font-family:ui-serif,'New York',Georgia,serif;font-weight:650;font-size:16px;margin:12px 0 4px}
+.report .h:first-child{margin-top:0}
+.empty{color:var(--muted);font-size:14px;text-align:center;padding:18px 8px}
+.item{padding:14px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:0;padding-top:4px}
+.item .t{font-weight:600}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--soft);color:var(--ink2)}
+.pill.enc{background:var(--accent-soft);color:var(--accent)}
+.pill.warn{background:color-mix(in srgb,var(--mid) 18%,transparent);color:var(--mid)}
+.next{margin-top:8px;font-size:14px;background:var(--soft);border-radius:10px;padding:8px 10px}
+.next b{font-weight:600}
+.next.none{color:var(--mid)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px}
+.stat .v{font-family:ui-serif,'New York',Georgia,serif;font-size:26px;font-weight:650;line-height:1.1}
+.stat .k{font-size:12px;color:var(--ink2)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--ink2);margin-bottom:6px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:14px;height:3px;border-radius:2px;display:inline-block}
+.chartbox{position:relative}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;padding:7px 9px;border-radius:9px;white-space:nowrap;opacity:0;transition:opacity .12s;z-index:2}
+.word{display:flex;justify-content:space-between;padding:7px 0;border-top:1px solid var(--line);font-size:15px}
+.word:first-child{border-top:0}
+.hist{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid var(--line);width:100%;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left}
+.hist:first-child{border-top:0}
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:20;display:none}
+.sheet{visibility:hidden;position:fixed;left:0;right:0;bottom:0;background:var(--card);border-radius:22px 22px 0 0;padding:18px 16px calc(20px + var(--safe-b));z-index:21;max-height:88vh;overflow:auto;transform:translateY(105%);transition:transform .25s ease}
+.sheet.open{transform:none;visibility:visible}
+.sheet .grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:-6px auto 12px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:6px}
+.hidden{display:none!important}
+.banner{background:color-mix(in srgb,var(--mid) 16%,var(--card));border:1px solid color-mix(in srgb,var(--mid) 35%,transparent);border-radius:16px;padding:12px 14px;margin-bottom:14px;font-size:14px;display:flex;gap:10px;align-items:center;justify-content:space-between}
+.trend{font-size:14px;color:var(--ink2);margin-top:6px}
+.toast{position:fixed;left:50%;bottom:calc(96px + var(--safe-b));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;z-index:30;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+.objhier{background:var(--accent-soft);border-color:transparent}
+.score{font-family:ui-serif,'New York',Georgia,serif;font-weight:650;font-size:20px;color:var(--accent);min-width:34px;text-align:right}
+.mini{font-size:13px;color:var(--ink2)}
+.note{font-size:13px;color:var(--muted);margin-top:8px}
+table.tv{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+table.tv th,table.tv td{text-align:center;padding:5px 2px;border-top:1px solid var(--line)}
+table.tv th{color:var(--ink2);font-weight:600}
+details summary{cursor:pointer;color:var(--ink2);font-size:13px;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="jour" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v15H4z"/><path d="M4 9h16M9 3v4M15 3v4"/></svg>Aujourd'hui</button>
+  <button data-tab="bilan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Bilan</button>
+  <button data-tab="projets"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 12l9 4 9-4M3 17l9 4 9-4"/></svg>Projets</button>
+  <button data-tab="idees"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>Idées</button>
+</nav>
+
+<div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet" id="sheet"><div class="grab"></div><div id="sheetBody"></div></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="importFile" accept="application/json,.json" class="hidden">
+
+<script>
+/* ============ Utilitaires ============ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad = n => String(n).padStart(2,"0");
+const keyOf = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parseKey = k => { const [y,m,d] = k.split("-").map(Number); return new Date(y, m-1, d); };
+const addDays = (k, n) => { const d = parseKey(k); d.setDate(d.getDate()+n); return keyOf(d); };
+const todayKey = () => keyOf(new Date());
+const JOURS = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+const MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+const fmtLong = k => { const d = parseKey(k); return `${JOURS[d.getDay()]} ${d.getDate()} ${MOIS[d.getMonth()]}`; };
+const fmtShort = k => { const d = parseKey(k); return `${JOURS[d.getDay()].slice(0,3)}. ${d.getDate()}`; };
+const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
+const mondayOf = k => { const d = parseKey(k); const w = (d.getDay()+6)%7; d.setDate(d.getDate()-w); return keyOf(d); };
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),2200); }
+
+/* ============ Stockage (sur le téléphone) ============
+   Docs : "day-YYYY-MM-DD", "projects", "ideas", "meta"
+   Tout est gardé dans le téléphone (localStorage + copie de secours IndexedDB). */
+const LS = "monjournal.v1";
+const state = { docs:{}, tab:"jour", day: todayKey() };
+let saveTimer = null;
+
+function lsLoad(){ try { const raw = localStorage.getItem(LS); if (raw) state.docs = JSON.parse(raw) || {}; } catch(e){} }
+function persistNow(){
+  try { localStorage.setItem(LS, JSON.stringify(state.docs)); setSaveLabel("Enregistré ✓"); }
+  catch(e){ setSaveLabel("⚠︎ Enregistrement impossible : fais une sauvegarde"); }
+  idbSave();
+}
+function getDoc(id, def){ return state.docs[id] || def; }
+function putDoc(id, data, delay = 400){
+  data.updatedAt = Date.now();
+  state.docs[id] = data;
+  setSaveLabel("…");
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(persistNow, delay);
+}
+window.addEventListener("pagehide", persistNow);
+document.addEventListener("visibilitychange", () => { if (document.hidden) persistNow(); });
+function setSaveLabel(t){ const el = $("#saveLbl"); if (el) el.textContent = t; }
+
+/* Copie de secours dans IndexedDB : si localStorage est vidé, on récupère d'ici. */
+function idb(){ return new Promise((res, rej) => { if (!window.indexedDB) return rej(); const r = indexedDB.open("monjournal", 1); r.onupgradeneeded = () => r.result.createObjectStore("kv"); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+async function idbSave(){ try { const db = await idb(); db.transaction("kv","readwrite").objectStore("kv").put(JSON.stringify(state.docs), "docs"); } catch(e){} }
+async function idbLoad(){ try { const db = await idb(); return await new Promise(res => { const q = db.transaction("kv").objectStore("kv").get("docs"); q.onsuccess = () => res(q.result ? JSON.parse(q.result) : null); q.onerror = () => res(null); }); } catch(e){ return null; } }
+async function initStorage(){
+  try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch(e){}
+  const backup = await idbLoad();
+  if (backup){
+    let changed = false;
+    for (const [k,v] of Object.entries(backup)){ const l = state.docs[k]; if (!l || (v.updatedAt||0) > (l.updatedAt||0)){ state.docs[k] = v; changed = true; } }
+    if (changed){ persistNow(); softRender(); }
+  } else idbSave();
+}
+function softRender(){
+  const a = document.activeElement;
+  if (a && (a.tagName === "TEXTAREA" || a.tagName === "INPUT")) return;
+  if ($("#sheet").classList.contains("open")) return;
+  render();
+}
+
+/* ============ Modèle ============ */
+const emptyDay = k => ({ date:k, energie:0, humeur:0, prod:0, bien:"", mal:"", ameliorer:"", libre:"", projets:[], objectifDemain:"", objectifStatut:"", report:"" });
+const dayDoc = k => getDoc("day-"+k, null);
+const projects = () => (getDoc("projects", {items:[]}).items || []);
+const ideas = () => (getDoc("ideas", {items:[]}).items || []);
+const saveProjects = items => putDoc("projects", {items}, 300);
+const saveIdeas = items => putDoc("ideas", {items}, 300);
+const hasContent = d => d && (d.bien||d.mal||d.ameliorer||d.libre||d.energie||d.humeur||d.prod||d.objectifDemain);
+
+function streak(){
+  let k = todayKey(), n = 0;
+  if (!hasContent(dayDoc(k))) k = addDays(k,-1);
+  while (hasContent(dayDoc(k))){ n++; k = addDays(k,-1); }
+  return n;
+}
+function lastWorked(pid){
+  const keys = Object.keys(state.docs).filter(k=>k.startsWith("day-")).sort().reverse();
+  for (const k of keys){ const d = state.docs[k]; if ((d.projets||[]).includes(pid)) return d.date; }
+  return null;
+}
+const daysBetween = (a,b) => Math.round((parseKey(b)-parseKey(a))/86400000);
+
+/* ============ Rendu ============ */
+function render(){
+  document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on", b.dataset.tab===state.tab));
+  const app = $("#app");
+  if (state.tab === "jour") app.innerHTML = viewJour();
+  if (state.tab === "bilan") app.innerHTML = viewBilan();
+  if (state.tab === "projets") app.innerHTML = viewProjets();
+  if (state.tab === "idees") app.innerHTML = viewIdees();
+  bind();
+}
+
+function viewJour(){
+  const k = state.day, d = Object.assign(emptyDay(k), dayDoc(k)||{});
+  const isToday = k === todayKey();
+  const hier = dayDoc(addDays(k,-1));
+  const s = streak();
+  const projs = projects().filter(p=>p.statut!=="termine");
+  const rate = (f,nm) => `<div class="rate"><span class="nm">${nm}</span><div class="pts">${[1,2,3,4,5].map(n=>`<button data-rate="${f}" data-v="${n}" class="${d[f]===n?"on":""}">${n}</button>`).join("")}</div></div>`;
+  const statutBtn = (v,l) => `<button data-obj="${v}" class="${hier&&hier.objectifStatut===v?"on":""}">${l}</button>`;
+  return `
+  <div class="top"><div><div class="sub">${isToday?"Aujourd'hui":"Journal"}</div><h1>Mon journal</h1></div>
+    ${s?`<span class="streak">🔥 ${s} jour${s>1?"s":""}</span>`:""}</div>
+  ${isToday ? backupBanner() : ""}
+  <div class="datebar">
+    <button class="iconbtn" data-nav="-1" aria-label="Jour précédent">‹</button>
+    <div class="d">${fmtLong(k)}${isToday?"":`<div><button class="btn ghost small" data-nav="today" style="margin-top:4px">Revenir à aujourd'hui</button></div>`}</div>
+    <button class="iconbtn" data-nav="1" aria-label="Jour suivant" ${isToday?"disabled style='opacity:.3'":""}>›</button>
+  </div>
+
+  ${hier && hier.objectifDemain ? `
+  <div class="card objhier">
+    <p class="label">Objectif fixé la veille</p>
+    <div style="font-weight:600;margin-bottom:10px">${esc(hier.objectifDemain)}</div>
+    <div class="seg">${statutBtn("oui","Atteint")}${statutBtn("partiel","En partie")}${statutBtn("non","Pas atteint")}</div>
+  </div>` : ""}
+
+  <div class="card">
+    <p class="label">Ma journée en un coup d'œil</p>
+    ${rate("energie","Énergie")}${rate("humeur","Humeur")}${rate("prod","Productivité")}
+  </div>
+
+  <div class="card">
+    <p class="label">Bilan guidé</p>
+    <div class="q"><span class="dot" style="background:var(--good)"></span>Qu'est-ce qui s'est bien passé ?</div>
+    <textarea data-f="bien" placeholder="Ce que j'ai bien fait, mes petites victoires…">${esc(d.bien)}</textarea>
+    <div class="q"><span class="dot" style="background:var(--bad)"></span>Qu'est-ce qui s'est moins bien passé ?</div>
+    <textarea data-f="mal" placeholder="Ce que j'ai raté, ce qui m'a freiné…">${esc(d.mal)}</textarea>
+    <div class="q"><span class="dot" style="background:var(--mid)"></span>Qu'est-ce que je peux améliorer ?</div>
+    <textarea data-f="ameliorer" placeholder="Ce que je ferai différemment…">${esc(d.ameliorer)}</textarea>
+  </div>
+
+  <div class="card">
+    <p class="label">Note libre</p>
+    <textarea data-f="libre" placeholder="Écris ce que tu veux sur ta journée…" style="min-height:110px">${esc(d.libre)}</textarea>
+  </div>
+
+  <div class="card">
+    <p class="label">Projets avancés aujourd'hui</p>
+    ${projs.length ? `<div class="row wrapf">${projs.map(p=>`<button class="chip ${(d.projets||[]).includes(p.id)?"on":""}" data-proj="${p.id}">${esc(p.nom)}</button>`).join("")}</div>`
+      : `<div class="mini">Ajoute tes projets dans l'onglet <b>Projets</b> pour pouvoir les cocher ici.</div>`}
+  </div>
+
+  <div class="card">
+    <p class="label">Objectif principal de demain</p>
+    <input data-f="objectifDemain" placeholder="La chose la plus importante à faire demain" value="${esc(d.objectifDemain)}">
+  </div>
+
+  <div class="card">
+    <div class="row between" style="margin-bottom:8px"><p class="label" style="margin:0">Rapport de ma journée</p>
+      <button class="btn small" id="genReport">${d.report?"Mettre à jour":"Voir mon rapport"}</button></div>
+    <div class="report" id="reportBox">${d.report ? md(d.report) : `<div class="mini">Remplis ton bilan, puis touche « Voir mon rapport » : ce que tu as bien fait, ce qui a moins marché, et quoi améliorer demain, en comparant avec tes jours précédents.</div>`}</div>
+  </div>
+  <div class="save" id="saveLbl"></div>`;
+}
+
+/* ---------- Bilan ---------- */
+const STOP = new Set("le la les un une des de du d l et ou à a au aux en dans sur pour par avec sans pas ne plus moins je j me m mon ma mes tu te ton ta tes il elle on nous vous ils elles se s ce c ça ca cet cette ces qui que qu quoi dont où est suis es sont été être ai as avoir fait faire trop très bien mal peu tout tous toute toutes y n si mais donc car comme aussi encore alors quand même lui leur leurs son sa ses notre nos votre vos eu avais était j'ai c'est d'un d'une l'on qu'il qu'on chose choses truc fois jour journée aujourd hui demain hier vraiment peut dois devrais faut".split(" "));
+function recurring(days){
+  const counts = {};
+  days.forEach(d => tokens(d).forEach(w => counts[w] = (counts[w]||0)+1));
+  return Object.entries(counts).filter(([,n])=>n>=2).sort((a,b)=>b[1]-a[1]).slice(0,6);
+}
+function viewBilan(){
+  const end = todayKey();
+  const keys = Array.from({length:7},(_,i)=>addDays(end,i-6));
+  const days = keys.map(k=>dayDoc(k)).filter(Boolean);
+  const filled = days.filter(hasContent).length;
+  // objectifs : objectifs fixés les 7 jours précédents, évalués
+  const objs = Array.from({length:7},(_,i)=>dayDoc(addDays(end,i-7))).filter(d=>d&&d.objectifDemain&&d.objectifStatut);
+  const objOk = objs.filter(d=>d.objectifStatut==="oui").length + objs.filter(d=>d.objectifStatut==="partiel").length*0.5;
+  const allDays = Object.keys(state.docs).filter(k=>k.startsWith("day-")).map(k=>state.docs[k]);
+  const month = allDays.filter(d=>daysBetween(d.date,end)>=0 && daysBetween(d.date,end)<30);
+  const rec = recurring(month);
+  const projs = projects().filter(p=>p.statut==="encours");
+  const projRows = projs.map(p=>{ const lw = lastWorked(p.id); const n = days.filter(d=>(d.projets||[]).includes(p.id)).length; return {p, lw, n}; });
+  const neglected = projRows.filter(r=> r.lw ? daysBetween(r.lw,end)>=7 : daysBetween(r.p.cree||end,end)>=7);
+  const wr = weekReport(end);
+  const hist = allDays.filter(hasContent).sort((a,b)=>a.date<b.date?1:-1).slice(0,30);
+  return `
+  <div class="top"><div><div class="sub">7 derniers jours</div><h1>Bilan</h1></div>
+    <button class="iconbtn" id="openSettings" aria-label="Réglages et sauvegardes">⚙︎</button></div>
+  ${backupBanner()}
+  <div class="stats">
+    <div class="stat"><div class="v">${streak()}</div><div class="k">jours d'affilée</div></div>
+    <div class="stat"><div class="v">${filled}/7</div><div class="k">bilans remplis</div></div>
+    <div class="stat"><div class="v">${objs.length?Math.round(objOk/objs.length*100)+"%":"–"}</div><div class="k">objectifs atteints</div></div>
+  </div>
+
+  <div class="card">
+    <h2>Énergie, humeur, productivité</h2>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Énergie</span><span><i style="background:var(--s2)"></i>Humeur</span><span><i style="background:var(--s3)"></i>Productivité</span></div>
+    <div class="chartbox" id="chartBox">${chart(keys)}<div class="tip" id="tip"></div></div>
+    <details><summary>Voir en tableau</summary>
+      <table class="tv"><tr><th></th>${keys.map(k=>`<th>${fmtShort(k)}</th>`).join("")}</tr>
+      ${[["energie","Énergie"],["humeur","Humeur"],["prod","Prod."]].map(([f,l])=>`<tr><th>${l}</th>${keys.map(k=>{const d=dayDoc(k);return `<td>${d&&d[f]?d[f]:"–"}</td>`}).join("")}</tr>`).join("")}</table>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>Ce qui revient souvent</h2>
+    <div class="mini" style="margin-bottom:6px">Mots qui reviennent dans « moins bien » et « à améliorer » sur 30 jours.</div>
+    ${rec.length ? rec.map(([w,n])=>`<div class="word"><span>${esc(w)}</span><span class="mini">${n} jours</span></div>`).join("") : `<div class="empty">Rien de récurrent pour l'instant. Continue tes bilans quelques jours.</div>`}
+  </div>
+
+  <div class="card">
+    <h2>Mes projets cette semaine</h2>
+    ${projRows.length ? projRows.map(r=>`<div class="word"><span>${esc(r.p.nom)}</span><span class="mini">${r.n} jour${r.n>1?"s":""}</span></div>`).join("") : `<div class="empty">Aucun projet en cours.</div>`}
+    ${neglected.length ? `<div class="next none" style="margin-top:10px">⚠︎ Pas touché depuis 7 jours ou plus : <b>${neglected.map(r=>esc(r.p.nom)).join(", ")}</b>. À relancer ou à mettre en pause ?</div>` : ""}
+  </div>
+
+  <div class="card">
+    <h2>Bilan de la semaine</h2>
+    <div class="report">${wr ? md(wr) : `<div class="empty">Ton bilan de la semaine apparaîtra dès ton premier jour rempli.</div>`}</div>
+    ${wr ? `<details><summary>Envie d'un avis plus poussé ? Copie ta semaine pour Claude</summary><div class="mini" style="margin:8px 0">Facultatif : ça copie tes 7 derniers jours avec une consigne. Colle-les ensuite dans une conversation Claude.</div><button class="btn ghost small" id="copyClaude">Copier ma semaine</button></details>` : ""}
+  </div>
+
+  <div class="card">
+    <h2>Historique</h2>
+    ${hist.length ? hist.map(d=>`<button class="hist" data-goto="${d.date}"><span>${fmtLong(d.date)}</span><span class="mini">${d.energie?"⚡"+d.energie+" ":""}${d.humeur?"🙂"+d.humeur+" ":""}${d.prod?"✅"+d.prod:""} ›</span></button>`).join("") : `<div class="empty">Ton historique apparaîtra ici.</div>`}
+  </div>`;
+}
+function chart(keys){
+  const W=340,H=190,L=20,R=20,T=12,B=26, iw=W-L-R, ih=H-T-B;
+  const x = i => L + iw*i/(keys.length-1), y = v => T + ih*(1-(v-1)/4);
+  const series = [["energie","var(--s1)"],["humeur","var(--s2)"],["prod","var(--s3)"]];
+  let g = "";
+  for (let v=1; v<=5; v++) g += `<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${L-8}" y="${y(v)+4}" font-size="11" fill="var(--muted)" text-anchor="end">${v}</text>`;
+  keys.forEach((k,i)=> g += `<text x="${x(i)}" y="${H-6}" font-size="11" fill="var(--muted)" text-anchor="middle">${fmtShort(k)}</text>`);
+  series.forEach(([f,c])=>{
+    let path="", pts="";
+    keys.forEach((k,i)=>{ const d=dayDoc(k); const v=d&&d[f]; if (v){ path += (path&&keys[i-1]&&dayDoc(keys[i-1])&&dayDoc(keys[i-1])[f]?"L":"M")+x(i)+","+y(v); pts += `<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="${c}" stroke="var(--card)" stroke-width="2"/>`; } });
+    g += `<path d="${path}" fill="none" stroke="${c}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>${pts}`;
+  });
+  g += `<line id="xh" x1="0" x2="0" y1="${T}" y2="${T+ih}" stroke="var(--muted)" stroke-width="1" opacity="0"/>`;
+  keys.forEach((k,i)=> g += `<rect data-i="${i}" class="hit" x="${x(i)-iw/(keys.length-1)/2}" y="0" width="${iw/(keys.length-1)}" height="${H}" fill="transparent"/>`);
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Évolution sur 7 jours" data-keys="${keys.join(",")}">${g}</svg>`;
+}
+
+/* ---------- Projets ---------- */
+const STATUTS = {encours:"En cours", pause:"En pause", termine:"Terminé"};
+function viewProjets(){
+  const ps = projects(); const f = state.projFilter || "encours";
+  const list = ps.filter(p=>p.statut===f);
+  const end = todayKey();
+  return `
+  <div class="top"><div><div class="sub">${ps.filter(p=>p.statut==="encours").length} en cours</div><h1>Mes projets</h1></div>
+    <button class="btn" id="addProj">+ Projet</button></div>
+  <div class="seg" style="margin-bottom:14px">${Object.entries(STATUTS).map(([k,l])=>`<button data-pf="${k}" class="${f===k?"on":""}">${l} (${ps.filter(p=>p.statut===k).length})</button>`).join("")}</div>
+  <div class="card">
+    ${list.length ? list.map(p=>{ const lw = lastWorked(p.id); const age = lw?daysBetween(lw,end):null;
+      return `<div class="item" data-editproj="${p.id}">
+        <div class="row between"><span class="t">${esc(p.nom)}</span>
+          ${p.statut==="encours" ? (age===null?`<span class="pill">Jamais coché</span>`: age>=7?`<span class="pill warn">${age} j sans avancer</span>`:`<span class="pill enc">${age===0?"Aujourd'hui":age===1?"Hier":"Il y a "+age+" j"}</span>`) : ""}</div>
+        ${p.description?`<div class="mini" style="margin-top:4px">${esc(p.description)}</div>`:""}
+        ${p.statut!=="termine" ? (p.prochaine?`<div class="next">→ <b>Prochaine étape :</b> ${esc(p.prochaine)}</div>`:`<div class="next none">Pas de prochaine étape définie. Touche pour en ajouter une.</div>`) : ""}
+      </div>`; }).join("") : `<div class="empty">${f==="encours"?"Aucun projet en cours. Ajoute-en un, ou transforme une idée en projet.":"Rien ici."}</div>`}
+  </div>
+  <div class="note">Astuce : une prochaine étape doit être une action concrète et faisable en moins d'une heure.</div>`;
+}
+function projSheet(p){
+  const isNew = !p; p = p || {id:uid(), nom:"", description:"", prochaine:"", statut:"encours", cree:todayKey()};
+  openSheet(`
+    <h2>${isNew?"Nouveau projet":"Modifier le projet"}</h2>
+    <div class="field"><label>Nom</label><input id="pNom" value="${esc(p.nom)}" placeholder="Ex. : Lancer ma chaîne YouTube"></div>
+    <div class="field"><label>Description / objectif</label><textarea id="pDesc" placeholder="Pourquoi ce projet, à quoi ressemble « fini » ?">${esc(p.description)}</textarea></div>
+    <div class="field"><label>Prochaine étape concrète</label><input id="pNext" value="${esc(p.prochaine)}" placeholder="Ex. : Écrire le script de la 1re vidéo"></div>
+    <div class="field"><label>Statut</label><div class="seg" id="pStat">${Object.entries(STATUTS).map(([k,l])=>`<button data-v="${k}" class="${p.statut===k?"on":""}">${l}</button>`).join("")}</div></div>
+    <div class="row between" style="margin-top:16px">
+      ${isNew?"<span></span>":`<button class="btn ghost" id="pDel" style="color:var(--bad)">Supprimer</button>`}
+      <div class="row"><button class="btn ghost" id="sheetClose">Annuler</button><button class="btn" id="pSave">Enregistrer</button></div>
+    </div>`);
+  let statut = p.statut;
+  document.querySelectorAll("#pStat button").forEach(b=>b.onclick=()=>{ statut=b.dataset.v; document.querySelectorAll("#pStat button").forEach(x=>x.classList.toggle("on",x===b)); });
+  $("#pSave").onclick = () => {
+    const nom = $("#pNom").value.trim(); if (!nom){ $("#pNom").focus(); return; }
+    const np = Object.assign({}, p, {nom, description:$("#pDesc").value.trim(), prochaine:$("#pNext").value.trim(), statut});
+    const list = projects().filter(x=>x.id!==p.id); list.unshift(np);
+    saveProjects(list); closeSheet(); state.projFilter = statut; render(); toast("Projet enregistré");
+  };
+  if (!isNew) $("#pDel").onclick = () => {
+    const b = $("#pDel");
+    if (!b.dataset.confirm){ b.dataset.confirm="1"; b.textContent="Confirmer ?"; return; }
+    saveProjects(projects().filter(x=>x.id!==p.id)); closeSheet(); render(); toast("Projet supprimé");
+  };
+}
+
+/* ---------- Idées ---------- */
+function viewIdees(){
+  const is = ideas().slice().sort((a,b)=>((b.envie||0)*(b.faisa||0))-((a.envie||0)*(a.faisa||0)) || (b.cree>a.cree?1:-1));
+  return `
+  <div class="top"><div><div class="sub">${is.length} idée${is.length>1?"s":""}</div><h1>Idées de projets</h1></div></div>
+  <div class="card">
+    <form id="ideaForm" class="row"><input id="ideaIn" placeholder="Note une idée en vitesse…" autocomplete="off"><button class="btn" type="submit">Ajouter</button></form>
+  </div>
+  <div class="card">
+    ${is.length ? is.map(i=>{ const sc=(i.envie||0)*(i.faisa||0); return `<div class="item" data-editidea="${i.id}">
+      <div class="row between"><span class="t">${esc(i.titre)}</span><span class="score" title="Envie × faisabilité">${sc||"–"}</span></div>
+      ${i.notes?`<div class="mini" style="margin-top:4px">${esc(i.notes)}</div>`:""}
+      <div class="mini" style="margin-top:6px">Envie ${i.envie||"–"}/5 · Faisabilité ${i.faisa||"–"}/5</div>
+    </div>`; }).join("") : `<div class="empty">Aucune idée pour l'instant. Note tout ce qui te passe par la tête, tu trieras plus tard.</div>`}
+  </div>
+  <div class="note">Le score (envie × faisabilité, sur 25) classe tes idées : celles du haut sont les meilleures candidates à lancer.</div>`;
+}
+function ideaSheet(i){
+  openSheet(`
+    <h2>Idée</h2>
+    <div class="field"><label>Titre</label><input id="iTit" value="${esc(i.titre)}"></div>
+    <div class="field"><label>Notes</label><textarea id="iNotes" placeholder="Détails, pour qui, comment…">${esc(i.notes||"")}</textarea></div>
+    <div class="rate"><span class="nm">Envie</span><div class="pts" id="iEnv">${[1,2,3,4,5].map(n=>`<button data-v="${n}" class="${i.envie===n?"on":""}">${n}</button>`).join("")}</div></div>
+    <div class="rate"><span class="nm">Faisabilité</span><div class="pts" id="iFai">${[1,2,3,4,5].map(n=>`<button data-v="${n}" class="${i.faisa===n?"on":""}">${n}</button>`).join("")}</div></div>
+    <button class="btn" id="iLaunch" style="width:100%;margin-top:14px">🚀 Transformer en projet</button>
+    <div class="row between" style="margin-top:12px">
+      <button class="btn ghost" id="iDel" style="color:var(--bad)">Supprimer</button>
+      <div class="row"><button class="btn ghost" id="sheetClose">Annuler</button><button class="btn" id="iSave">Enregistrer</button></div>
+    </div>`);
+  let envie=i.envie||0, faisa=i.faisa||0;
+  const pick = (sel,set) => document.querySelectorAll(sel+" button").forEach(b=>b.onclick=()=>{ set(+b.dataset.v); document.querySelectorAll(sel+" button").forEach(x=>x.classList.toggle("on",x===b)); });
+  pick("#iEnv",v=>envie=v); pick("#iFai",v=>faisa=v);
+  const collect = () => Object.assign({}, i, {titre:$("#iTit").value.trim()||i.titre, notes:$("#iNotes").value.trim(), envie, faisa});
+  $("#iSave").onclick = () => { saveIdeas(ideas().map(x=>x.id===i.id?collect():x)); closeSheet(); render(); };
+  $("#iDel").onclick = () => { const b=$("#iDel"); if(!b.dataset.confirm){b.dataset.confirm="1";b.textContent="Confirmer ?";return;} saveIdeas(ideas().filter(x=>x.id!==i.id)); closeSheet(); render(); toast("Idée supprimée"); };
+  $("#iLaunch").onclick = () => {
+    const c = collect();
+    saveIdeas(ideas().filter(x=>x.id!==i.id));
+    closeSheet();
+    projSheet({id:uid(), nom:c.titre, description:c.notes||"", prochaine:"", statut:"encours", cree:todayKey()});
+  };
+}
+
+/* ---------- Réglages ---------- */
+function settingsSheet(){
+  const nDays = Object.keys(state.docs).filter(k=>k.startsWith("day-")&&hasContent(state.docs[k])).length;
+  const sb = daysSinceBackup();
+  openSheet(`
+    <h2>Réglages et sauvegardes</h2>
+    <div class="mini" style="margin-bottom:14px">Tout est enregistré dans ton téléphone, rien n'est envoyé sur internet. ${nDays} jour${nDays>1?"s":""} de bilan enregistré${nDays>1?"s":""}.</div>
+    <h3 style="margin-bottom:6px">Sauvegarder</h3>
+    <div class="mini" style="margin-bottom:10px">${sb===null?"Aucune sauvegarde pour l'instant.":sb===0?"Dernière sauvegarde : aujourd'hui.":`Dernière sauvegarde : il y a ${sb} jour${sb>1?"s":""}.`} Choisis <b>« Enregistrer dans Fichiers »</b> puis <b>iCloud Drive</b> : ta sauvegarde sera à l'abri même si tu perds ton téléphone.</div>
+    <button class="btn" data-backup style="width:100%;margin-bottom:16px">💾 Sauvegarder maintenant</button>
+    <h3 style="margin-bottom:6px">Restaurer</h3>
+    <div class="mini" style="margin-bottom:10px">Récupère une sauvegarde (nouveau téléphone, données effacées…). Rien n'est supprimé : les deux sont fusionnées.</div>
+    <div class="row wrapf" style="margin-bottom:10px"><button class="btn ghost" id="imp">Choisir un fichier</button><button class="btn ghost" id="pasteToggle">Coller un texte</button></div>
+    <div id="pasteBox" class="hidden"><textarea id="pasteIn" placeholder="Colle ici la sauvegarde copiée depuis l'ancienne version"></textarea><button class="btn" id="pasteGo" style="margin-top:8px">Importer</button></div>
+    <h3 style="margin:16px 0 6px">Rappel du soir</h3>
+    <div class="mini">Ouvre l'app <b>Rappels</b> et crée « Faire mon bilan » chaque jour à 21 h.</div>
+    <button class="btn ghost" id="sheetClose" style="width:100%;margin-top:18px">Fermer</button>`);
+  $("#sheetBody").querySelector("[data-backup]").onclick = backupNow;
+  $("#imp").onclick = () => $("#importFile").click();
+  $("#pasteToggle").onclick = () => $("#pasteBox").classList.toggle("hidden");
+  $("#pasteGo").onclick = () => { try { const n = importDocs(JSON.parse($("#pasteIn").value)); closeSheet(); render(); toast(`Importé ✓ (${n} élément${n>1?"s":""})`); } catch(e){ toast("Texte non reconnu"); } };
+}
+$("#importFile").onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try { const n = importDocs(JSON.parse(await f.text())); closeSheet(); render(); toast(`Sauvegarde restaurée ✓ (${n} élément${n>1?"s":""})`); }
+  catch(err){ toast("Fichier non reconnu"); }
+  e.target.value = "";
+};
+
+/* ---------- Feuille ---------- */
+function openSheet(html){ $("#sheetBody").innerHTML = html; $("#sheetBg").style.display="block"; requestAnimationFrame(()=>$("#sheet").classList.add("open")); const c=$("#sheetClose"); if(c) c.onclick=closeSheet; }
+function closeSheet(){ $("#sheet").classList.remove("open"); $("#sheetBg").style.display="none"; }
+$("#sheetBg").onclick = closeSheet;
+
+/* ---------- IA ---------- */
+function md(t){
+  const lines = String(t).split("\n"); let out = "", inList = false;
+  const inline = s => esc(s).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
+  for (let l of lines){
+    l = l.trim();
+    if (/^[-•*]\s+/.test(l)){ if(!inList){out+="<ul>";inList=true;} out += `<li>${inline(l.replace(/^[-•*]\s+/,""))}</li>`; continue; }
+    if (inList){ out+="</ul>"; inList=false; }
+    if (!l) continue;
+    if (/^#{1,4}\s+/.test(l)) out += `<div class="h">${inline(l.replace(/^#+\s+/,""))}</div>`;
+    else out += `<p>${inline(l)}</p>`;
+  }
+  if (inList) out += "</ul>";
+  return out;
+}
+function dayText(d){
+  if (!d) return "(rien)";
+  const pn = id => (projects().find(p=>p.id===id)||{}).nom || "?";
+  return [`Date : ${fmtLong(d.date)}`, `Énergie ${d.energie||"?"}/5, humeur ${d.humeur||"?"}/5, productivité ${d.prod||"?"}/5`,
+    d.bien&&`Bien passé : ${d.bien}`, d.mal&&`Moins bien passé : ${d.mal}`, d.ameliorer&&`À améliorer : ${d.ameliorer}`,
+    d.libre&&`Note libre : ${d.libre}`, (d.projets||[]).length&&`Projets avancés : ${d.projets.map(pn).join(", ")}`,
+    d.objectifDemain&&`Objectif fixé pour le lendemain : ${d.objectifDemain}${d.objectifStatut?` (résultat : ${{oui:"atteint",partiel:"en partie",non:"pas atteint"}[d.objectifStatut]})`:""}`].filter(Boolean).join("\n");
+}
+/* ---------- Rapports automatiques (calculés sur le téléphone) ---------- */
+const NOMS = {energie:"Énergie", humeur:"Humeur", prod:"Productivité"};
+const fr1 = n => (Math.round(n*10)/10).toString().replace(".",",");
+function bullets(t){ return String(t||"").split(/\n+|(?<=[.!?])\s+/).map(x=>x.trim().replace(/^[-•*]\s*/,"")).filter(x=>x.length>1).slice(0,5); }
+function tokens(d){
+  return new Set(((d.mal||"")+" "+(d.ameliorer||"")).toLowerCase().normalize("NFC").split(/[^a-zàâäçéèêëîïôöùûüœ'-]+/i)
+    .map(w=>w.replace(/^[ldjmtscn]'|^qu'/,"").replace(/^-+|-+$/g,"")).filter(w=>w.length>3 && !STOP.has(w)));
+}
+function avgOf(days, f){ const v = days.map(d=>d&&d[f]).filter(Boolean); return v.length ? v.reduce((a,b)=>a+b,0)/v.length : null; }
+function prevDays(k, n){ return Array.from({length:n},(_,i)=>dayDoc(addDays(k,-n+i))).filter(hasContent); }
+
+function dailyReport(k){
+  const d = Object.assign(emptyDay(k), dayDoc(k)||{});
+  const hier = dayDoc(addDays(k,-1));
+  const prev = prevDays(k, 7);
+  const pn = id => (projects().find(p=>p.id===id)||{}).nom;
+  const good = [], bad = [], next = [];
+
+  bullets(d.bien).forEach(x=>good.push(x));
+  if (hier && hier.objectifDemain && hier.objectifStatut==="oui") good.push(`Objectif d'hier atteint : **${hier.objectifDemain}**. Bravo.`);
+  if (hier && hier.objectifDemain && hier.objectifStatut==="partiel") good.push(`Objectif d'hier en partie atteint : **${hier.objectifDemain}**. C'est déjà un pas.`);
+  const done = (d.projets||[]).map(pn).filter(Boolean);
+  if (done.length) good.push(`Tu as avancé sur **${done.join(", ")}**.`);
+
+  bullets(d.mal).forEach(x=>bad.push(x));
+  if (hier && hier.objectifDemain && hier.objectifStatut==="non") bad.push(`Objectif d'hier pas atteint : **${hier.objectifDemain}**. Était-il trop gros ? Essaie de le découper.`);
+
+  ["energie","humeur","prod"].forEach(f=>{
+    const v = d[f]; if (!v) return;
+    const m = avgOf(prev, f);
+    const cmp = m!==null && prev.length>=2 ? ` (ta moyenne : ${fr1(m)})` : "";
+    if (v>=4 && (m===null || v>=m)) good.push(`${NOMS[f]} élevée : ${v}/5${cmp}.`);
+    else if (v<=2) bad.push(`${NOMS[f]} basse : ${v}/5${cmp}.`);
+    else if (m!==null && prev.length>=2 && m - v >= 1) bad.push(`${NOMS[f]} en dessous de d'habitude : ${v}/5${cmp}.`);
+  });
+
+  bullets(d.ameliorer).forEach(x=>next.push(x));
+  // Ce qui revient souvent
+  const today = tokens(d), counts = {};
+  prev.forEach(p => tokens(p).forEach(w => { if (today.has(w)) counts[w]=(counts[w]||0)+1; }));
+  Object.entries(counts).filter(([,n])=>n>=2).sort((a,b)=>b[1]-a[1]).slice(0,2)
+    .forEach(([w,n]) => next.push(`« **${w}** » revient souvent (${n+1} jours sur 8). C'est un vrai sujet : prévois une action précise pour ça.`));
+  if (d.energie && d.energie<=2 && d.prod && d.prod<=2) next.push("Énergie et productivité basses : couche-toi plus tôt ce soir, c'est souvent le levier le plus simple.");
+  // Projets délaissés
+  const end = k;
+  projects().filter(p=>p.statut==="encours").forEach(p=>{
+    const lw = lastWorked(p.id), age = lw ? daysBetween(lw,end) : (p.cree ? daysBetween(p.cree,end) : 0);
+    if (age>=5) next.push(`**${p.nom}** n'a pas avancé depuis ${age} jours.${p.prochaine?` Prochaine étape : ${p.prochaine}.`:""} Même 15 minutes suffisent.`);
+  });
+  next.push(d.objectifDemain ? `Ton objectif de demain : **${d.objectifDemain}**.` : "Fixe-toi un objectif principal pour demain (en bas de la page).");
+
+  const sec = (t, arr, vide) => `### ${t}\n` + (arr.length ? arr.map(x=>"- "+x).join("\n") : vide);
+  return [sec("Ce que tu as bien fait", good, "Rien noté ici. Même une petite victoire compte : essaie d'en trouver une."),
+          sec("Ce qui a moins marché", bad, "Rien de négatif noté aujourd'hui."),
+          sec("À améliorer demain", next, "")].join("\n\n");
+}
+
+function weekReport(end){
+  const keys = Array.from({length:7},(_,i)=>addDays(end,i-6));
+  const days = keys.map(dayDoc).filter(hasContent);
+  if (!days.length) return null;
+  const before = Array.from({length:7},(_,i)=>dayDoc(addDays(end,i-13))).filter(hasContent);
+  const out = [];
+  // En bref
+  const lines = [`- **${days.length}/7** bilans remplis.`];
+  ["energie","humeur","prod"].forEach(f=>{
+    const m = avgOf(days,f); if (m===null) return;
+    const p = avgOf(before,f);
+    const tr = p===null ? "" : m-p>=0.3 ? ` ↑ (semaine d'avant : ${fr1(p)})` : p-m>=0.3 ? ` ↓ (semaine d'avant : ${fr1(p)})` : " (stable)";
+    lines.push(`- ${NOMS[f]} moyenne : **${fr1(m)}/5**${tr}`);
+  });
+  out.push("### Ta semaine en bref\n" + lines.join("\n"));
+  // Meilleur / pire jour
+  const scored = days.map(d=>({d, s:(d.energie||0)+(d.humeur||0)+(d.prod||0)})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s);
+  if (scored.length>=2){
+    const best = scored[0], worst = scored[scored.length-1];
+    let t = `### Meilleur jour et jour difficile\n- Meilleur : **${fmtLong(best.d.date)}**${best.d.bien?` — ${bullets(best.d.bien)[0]||""}`:""}`;
+    if (worst.s < best.s) t += `\n- Plus difficile : **${fmtLong(worst.d.date)}**${worst.d.mal?` — ${bullets(worst.d.mal)[0]||""}`:""}`;
+    out.push(t);
+  }
+  // Objectifs
+  const objs = Array.from({length:7},(_,i)=>dayDoc(addDays(end,i-7))).filter(d=>d&&d.objectifDemain&&d.objectifStatut);
+  let objRate = null;
+  if (objs.length){
+    const o = objs.filter(d=>d.objectifStatut==="oui").length, p = objs.filter(d=>d.objectifStatut==="partiel").length, n = objs.length-o-p;
+    objRate = (o+p*0.5)/objs.length;
+    out.push(`### Tes objectifs\n- ${o} atteint${o>1?"s":""}, ${p} en partie, ${n} pas atteint${n>1?"s":""} (${Math.round(objRate*100)} %).`);
+  }
+  // Récurrent
+  const rec = recurring(days);
+  if (rec.length) out.push("### Ce qui revient et freine\n" + rec.slice(0,4).map(([w,n])=>`- « **${w}** » : ${n} jours`).join("\n"));
+  // Projets
+  const projs = projects().filter(p=>p.statut==="encours");
+  if (projs.length){
+    out.push("### Tes projets\n" + projs.map(p=>{ const n = days.filter(d=>(d.projets||[]).includes(p.id)).length; return `- **${p.nom}** : ${n ? `avancé ${n} jour${n>1?"s":""}` : "pas avancé cette semaine ⚠︎"}`; }).join("\n"));
+  }
+  // Focus
+  let focus;
+  const neglected = projs.filter(p=>!days.some(d=>(d.projets||[]).includes(p.id)));
+  if (rec.length) focus = `Agir sur « **${rec[0][0]}** », qui revient ${rec[0][1]} jours. Décide d'une règle simple et tiens-la 7 jours.`;
+  else if (objRate!==null && objRate<0.5) focus = "Te fixer des objectifs **plus petits** : un objectif atteint motive plus qu'un gros objectif raté.";
+  else if (neglected.length) focus = `Relancer **${neglected[0].nom}**${neglected[0].prochaine?` avec : ${neglected[0].prochaine}`:""}, ou le mettre en pause pour libérer ta tête.`;
+  else if (days.length<5) focus = "Faire ton bilan **chaque soir**, même en 2 minutes : c'est ce qui rend les rapports utiles.";
+  else focus = "Garder le rythme : ta semaine est solide. Choisis un seul point à améliorer encore.";
+  out.push("### Ton focus pour la semaine prochaine\n- " + focus);
+  return out.join("\n\n");
+}
+
+/* Texte prêt à coller dans Claude (facultatif) */
+function claudePrompt(end){
+  const days = Array.from({length:7},(_,i)=>dayDoc(addDays(end,i-6))).filter(hasContent);
+  const projs = projects().map(p=>`- ${p.nom} [${STATUTS[p.statut]}]${p.prochaine?` — prochaine étape : ${p.prochaine}`:""}`).join("\n");
+  return `Tu es mon coach personnel, bienveillant mais honnête. Voici mes bilans des 7 derniers jours. Dis-moi ce que je fais bien, ce qui me freine, et donne-moi un focus concret pour la semaine prochaine.\n\n${days.map(dayText).join("\n\n")}\n\nMes projets :\n${projs||"(aucun)"}`;
+}
+
+/* ---------- Sauvegardes ---------- */
+const meta = () => getDoc("meta", {});
+function daysSinceBackup(){ const t = meta().lastBackup; return t ? Math.floor((Date.now()-t)/86400000) : null; }
+function needBackup(){ const n = Object.keys(state.docs).filter(k=>k.startsWith("day-")).length; const s = daysSinceBackup(); return n>=3 && (s===null || s>=7); }
+function backupJSON(){ return JSON.stringify({app:"monjournal", version:2, exporte:new Date().toISOString(), docs:state.docs}); }
+async function backupNow(){
+  const name = `mon-journal-${todayKey()}.json`;
+  const json = backupJSON();
+  const markDone = () => { putDoc("meta", Object.assign({}, meta(), {lastBackup: Date.now()}), 50); render(); toast("Sauvegarde faite ✓"); };
+  try {
+    const file = new File([json], name, {type:"application/json"});
+    if (navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file], title:"Sauvegarde Mon Journal"});
+      markDone(); return;
+    }
+  } catch(e){ if (e && e.name==="AbortError"){ toast("Sauvegarde annulée"); return; } }
+  try {
+    const url = URL.createObjectURL(new Blob([json], {type:"application/json"}));
+    const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 4000);
+    markDone();
+  } catch(e){ toast("Sauvegarde impossible ici"); }
+}
+function importDocs(j){
+  if (!j || typeof j.docs !== "object") throw new Error("format");
+  let n = 0;
+  for (const [k,v] of Object.entries(j.docs)){
+    if (!v || typeof v !== "object" || k.startsWith("week-")) continue;
+    const l = state.docs[k];
+    if (k==="projects" || k==="ideas"){
+      // fusion par id pour ne rien perdre
+      const map = {}; ((l&&l.items)||[]).forEach(x=>map[x.id]=x); (v.items||[]).forEach(x=>{ if(!map[x.id]) { map[x.id]=x; n++; } });
+      state.docs[k] = {items:Object.values(map), updatedAt:Date.now()};
+    } else if (!l || (v.updatedAt||0) > (l.updatedAt||0)){ state.docs[k] = v; n++; }
+  }
+  persistNow(); return n;
+}
+function backupBanner(){
+  if (!needBackup()) return "";
+  const s = daysSinceBackup();
+  return `<div class="banner"><span>💾 ${s===null?"Tu n'as encore jamais fait de sauvegarde.":`Dernière sauvegarde il y a ${s} jours.`}</span><button class="btn small" data-backup>Sauvegarder</button></div>`;
+}
+
+/* ---------- Événements ---------- */
+function bind(){
+  const k = state.day;
+  const cur = () => Object.assign(emptyDay(k), dayDoc(k)||{});
+  document.querySelectorAll("[data-f]").forEach(el => {
+    el.oninput = () => { const d = cur(); d[el.dataset.f] = el.value; putDoc("day-"+k, d); if (el.tagName==="TEXTAREA") autoGrow(el); };
+    if (el.tagName==="TEXTAREA") autoGrow(el);
+  });
+  document.querySelectorAll("[data-rate]").forEach(b => b.onclick = () => { const d = cur(); const v=+b.dataset.v; d[b.dataset.rate] = d[b.dataset.rate]===v?0:v; putDoc("day-"+k, d, 300); render(); });
+  document.querySelectorAll("[data-proj]").forEach(b => b.onclick = () => { const d = cur(); const id=b.dataset.proj; d.projets = (d.projets||[]).includes(id) ? d.projets.filter(x=>x!==id) : [...(d.projets||[]), id]; putDoc("day-"+k, d, 300); render(); });
+  document.querySelectorAll("[data-obj]").forEach(b => b.onclick = () => { const hk = addDays(k,-1); const h = Object.assign(emptyDay(hk), dayDoc(hk)||{}); h.objectifStatut = h.objectifStatut===b.dataset.obj?"":b.dataset.obj; putDoc("day-"+hk, h, 300); render(); });
+  document.querySelectorAll("[data-nav]").forEach(b => b.onclick = () => { const v=b.dataset.nav; if (v==="today") state.day=todayKey(); else { const n=addDays(state.day,+v); if (n<=todayKey()) state.day=n; } render(); window.scrollTo(0,0); });
+  document.querySelectorAll("[data-goto]").forEach(b => b.onclick = () => { state.day=b.dataset.goto; state.tab="jour"; render(); window.scrollTo(0,0); });
+  document.querySelectorAll("[data-pf]").forEach(b => b.onclick = () => { state.projFilter=b.dataset.pf; render(); });
+  document.querySelectorAll("[data-editproj]").forEach(b => b.onclick = () => projSheet(projects().find(p=>p.id===b.dataset.editproj)));
+  document.querySelectorAll("[data-editidea]").forEach(b => b.onclick = () => ideaSheet(ideas().find(i=>i.id===b.dataset.editidea)));
+  const ap = $("#addProj"); if (ap) ap.onclick = () => projSheet(null);
+  const os = $("#openSettings"); if (os) os.onclick = settingsSheet;
+  const gr = $("#genReport"); if (gr) gr.onclick = () => { const d = cur(); if (!hasContent(d)){ toast("Remplis d'abord ton bilan"); return; } d.report = dailyReport(k); putDoc("day-"+k, d, 100); render(); setTimeout(()=>{ const b=$("#reportBox"); if(b) b.scrollIntoView({behavior:"smooth", block:"start"}); }, 50); };
+  const cc = $("#copyClaude"); if (cc) cc.onclick = async () => { try { await navigator.clipboard.writeText(claudePrompt(todayKey())); toast("Copié — colle-le dans Claude"); } catch(e){ toast("Copie impossible"); } };
+  document.querySelectorAll("#app [data-backup]").forEach(b => b.onclick = backupNow);
+  const f = $("#ideaForm"); if (f) f.onsubmit = e => { e.preventDefault(); const v=$("#ideaIn").value.trim(); if(!v) return; saveIdeas([{id:uid(), titre:v, notes:"", envie:0, faisa:0, cree:todayKey()}, ...ideas()]); render(); setTimeout(()=>{const i=$("#ideaIn"); if(i) i.focus();},0); toast("Idée ajoutée — touche-la pour la noter"); };
+  bindChart();
+}
+function autoGrow(el){ el.style.height="auto"; el.style.height = Math.max(84, el.scrollHeight+2)+"px"; }
+function bindChart(){
+  const box = $("#chartBox"); if (!box) return;
+  const svg = box.querySelector("svg"), tip = $("#tip"), xh = svg.querySelector("#xh");
+  const keys = svg.dataset.keys.split(",");
+  const show = i => {
+    const d = dayDoc(keys[i]) || {};
+    tip.innerHTML = `<b>${fmtShort(keys[i])}</b><br>Énergie ${d.energie||"–"} · Humeur ${d.humeur||"–"} · Prod. ${d.prod||"–"}`;
+    const rect = svg.querySelectorAll(".hit")[i]; const bb = svg.getBoundingClientRect(); const sc = bb.width/340;
+    const cx = (+rect.getAttribute("x") + +rect.getAttribute("width")/2);
+    xh.setAttribute("x1",cx); xh.setAttribute("x2",cx); xh.setAttribute("opacity",".5");
+    tip.style.opacity = 1; const tw = tip.offsetWidth;
+    tip.style.left = Math.min(Math.max(0, cx*sc - tw/2), bb.width - tw) + "px"; tip.style.top = "-6px";
+  };
+  svg.querySelectorAll(".hit").forEach(r => { r.addEventListener("pointerenter", ()=>show(+r.dataset.i)); r.addEventListener("pointerdown", ()=>show(+r.dataset.i)); });
+  svg.addEventListener("pointerleave", ()=>{ tip.style.opacity=0; xh.setAttribute("opacity","0"); });
+}
+document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => { state.tab = b.dataset.tab; if (state.tab==="jour") state.day = state.day || todayKey(); render(); window.scrollTo(0,0); });
+
+/* Si l'appli reste ouverte après minuit, revenir sur le bon jour */
+let lastToday = todayKey();
+document.addEventListener("visibilitychange", () => { if (!document.hidden && todayKey()!==lastToday){ if (state.day===lastToday) state.day=todayKey(); lastToday=todayKey(); softRender(); } });
+
+lsLoad();
+render();
+initStorage();
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
